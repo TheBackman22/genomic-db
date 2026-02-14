@@ -2,8 +2,8 @@ import pytest
 from genomic_db.models import Genome, Chromosome, Gene
 
 class ModelTests:
-    """Basic tests for genomic models."""
-    """Run with pytest using `pytest tests/test_models.py`."""
+    """Basic tests for genomic models"""
+    """Run with pytest using `pytest tests/test_models.py`"""
 
     def test_genome_creation(self):
         """Test that Genome model can be instantiated."""
