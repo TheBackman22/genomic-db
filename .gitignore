@@ -28,6 +28,7 @@ htmlcov/
 # Environment
 .env
 .env.local
+.env.prod
 
 # Data files (keep sample data)
 data/*

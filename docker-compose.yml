@@ -1,36 +1,68 @@
 services:
-  db:
+  db-dev:
     image: postgres:16-alpine
-    container_name: genomics-db
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: genomics
+    container_name: genomics-db-dev
+    env_file: .env.dev
     ports:
       - "5432:5432"
     volumes:
-      # Persist data between container restarts
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    profiles:
+      - dev
 
-  backup:
+  db-prod:
+    image: postgres:16-alpine
+    container_name: genomics-db-prod
+    env_file: .env.prod
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - prod
+
+  backup-dev:
     image: postgres:16-alpine
     depends_on:
-      db:
+      db-dev:
         condition: service_healthy
+    env_file: .env.dev
     environment:
-      PGPASSWORD: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./backups:/backups
     entrypoint: >
-      sh -c 'pg_dump -h db -U postgres genomics > /backups/genomics_$$(date +%Y%m%d_%H%M%S).sql
+      sh -c 'pg_dump -h db-dev -U postgres ${POSTGRES_DB} > /backups/${POSTGRES_DB}_$$(date +%Y%m%d_%H%M%S).sql
       && echo "Backup saved to backups/"'
     profiles:
-      - tools
+      - dev-tools
+
+  backup-prod:
+    image: postgres:16-alpine
+    depends_on:
+      db-prod:
+        condition: service_healthy
+    env_file: .env.prod
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    entrypoint: >
+      sh -c 'pg_dump -h db-prod -U postgres ${POSTGRES_DB} > /backups/${POSTGRES_DB}_$$(date +%Y%m%d_%H%M%S).sql
+      && echo "Backup saved to backups/"'
+    profiles:
+      - prod-tools
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
+  postgres_data_prod:

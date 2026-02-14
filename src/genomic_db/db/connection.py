@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 # Connection string from environment, with sensible local default
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql+psycopg://postgres:postgres@localhost:5432/genomics"
+    "postgresql+psycopg://postgres:postgres@localhost:5432/genomics_dev"
 )
 
 # Create engine - the core interface to the database
